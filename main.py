@@ -15,7 +15,7 @@ while True:
         print("Nome Inválido!")
         
 tamanho = (800,200)
-pygame.display.set_caption("Iron Man do Marcão")
+pygame.display.set_caption("Iron Man de Pensamento computacional")
 icone  = pygame.image.load("assets/icone.png")
 pygame.display.set_icon(icone)
 relogio = pygame.time.Clock()
