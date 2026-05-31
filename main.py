@@ -5,8 +5,10 @@ from recursos.funcoes import inicializarBancoDeDados, limpar_tela, escreverDados
 limpar_tela()
 inicializarBancoDeDados()
 nome_maior, maior_pontos, dataJogada = maior_pontuador()
+pygame.mixer.pre_init(44100, -16, 2, 4096)
 pygame.init()
-
+somDeEntrada = pygame.mixer.Sound("base/SomDeInicio.wav")
+pygame.mixer.music.load("base/MusicaDaTelaRodando.mp3")
 while True:
     nome = input("Informe o Nome do Competidor:")
     if len(nome) > 0: 
@@ -24,7 +26,7 @@ tela = pygame.display.set_mode( tamanho )
 branco = (255, 255, 255)
 preto = (0, 0, 0)
 
-fundo = pygame.image.load("base/teste1.png")
+fundo = pygame.image.load("base/beckground.png")
 fundoDead = pygame.image.load("base/backgroundDead.jpg")
 fundoStart = pygame.image.load("base/backgroundStart.jpg")
 
@@ -34,10 +36,12 @@ missel = pygame.image.load("base/missile.png")
 missel = pygame.transform.scale(missel, (125,25))
 missileSound = pygame.mixer.Sound("base/missile.wav")
 explosaoSound = pygame.mixer.Sound("base/explosao.wav")
-pygame.mixer.music.load("base/ironsound.mp3")
 fonteMenu = pygame.font.SysFont("comicsans",18)
 
 def jogar():
+    somDeEntrada.stop()
+    pygame.mixer.music.play()
+    
     fundoMov1 = 0
     fundoMov2 = -2108
     posicaoXPersona = 425
@@ -45,8 +49,8 @@ def jogar():
     movimentoXPersona  = 0
     movimentoYPersona  = 0
     velocidadeMovPersona = 5
-    posicaoXMissel = 800
-    posicaoYMissel = 100
+    posicaoXMissel = random.choice([315, 370, 425, 480, 535])
+    posicaoYMissel = -100
     velocidadeMissel = 2
     pontos = 0
     pygame.mixer.Sound.play(missileSound)
@@ -77,51 +81,52 @@ def jogar():
         
         posicaoXPersona = posicaoXPersona + movimentoXPersona          
         posicaoYPersona = posicaoYPersona + movimentoYPersona            
-        if posicaoXPersona < 285:
-            posicaoXPersona = 285
-        elif posicaoXPersona > 560:
-            posicaoXPersona = 560
-        if posicaoYPersona < 250 :
-            posicaoYPersona = 250
+        if posicaoXPersona < 315:
+            posicaoXPersona = 315
+        elif posicaoXPersona > 535:
+            posicaoXPersona = 535
+        if posicaoYPersona < 0 :
+            posicaoYPersona = 0
         elif posicaoYPersona > 550:
             posicaoYPersona = 550
             
             
-        posicaoXMissel = posicaoXMissel - velocidadeMissel
-        if posicaoXMissel < -125:
+        posicaoYMissel = posicaoYMissel + velocidadeMissel
+        if posicaoYMissel > 800:
             pygame.mixer.Sound.play(missileSound)
-            posicaoXMissel = 800
+            posicaoYMissel = -100
+            posicaoXMissel = random.choice([315, 370, 425, 480, 535])
             pontos = pontos + 1
             velocidadeMissel = velocidadeMissel + 1
-            posicaoYMissel = random.randint(0,200)
                             
         tela.fill(branco)
-        tela.blit(fundo, (0,fundoMov1) )
-        tela.blit(fundo, (0,fundoMov2) )
+        tela.blit(fundo, (0, fundoMov1))
+        tela.blit(fundo, (0, fundoMov2))
         fundoMov1 += 1
         fundoMov2 += 1
+
         if fundoMov1 >= 2108:
             fundoMov1 = -2108
         if fundoMov2 >= 2108:
             fundoMov2 = -2108
-        
-        
-        tela.blit(Skyline, (posicaoXPersona,posicaoYPersona))
-        tela.blit( missel, (posicaoXMissel, posicaoYMissel) )
-        texto = fonteMenu.render("Pontos: "+str(pontos), True, branco)
-        tela.blit(texto, (700,15))
-        
-        fonte_coord = pygame.font.SysFont("Arial", 25)
 
+        tela.blit(Skyline, (posicaoXPersona, posicaoYPersona))
+        tela.blit(missel, (posicaoXMissel, posicaoYMissel))
+
+        texto = fonteMenu.render("Pontos: " + str(pontos), True, branco)
+        tela.blit(texto, (700, 15))
+
+        fonte_coord = pygame.font.SysFont("Arial", 25)
         texto_posicao = fonte_coord.render(f"X: {posicaoXPersona} | Y: {posicaoYPersona}", True, (255, 255, 255))
         tela.blit(texto_posicao, (10, 10))
             
-        pixelsPersonaX = list(range(posicaoXPersona, posicaoXPersona+116))
-        pixelsPersonaY = list(range(posicaoYPersona, posicaoYPersona+51))
+        pixelsPersonaX = list(range(posicaoXPersona, posicaoXPersona + 116))
+        pixelsPersonaY = list(range(posicaoYPersona, posicaoYPersona + 51))
         pixelsMisselX = list(range(posicaoXMissel, posicaoXMissel + 125))
         pixelsMisselY = list(range(posicaoYMissel, posicaoYMissel + 25))
-        if  len( list( set(pixelsMisselY).intersection(set(pixelsPersonaY))) ) > dificuldade:
-            if len( list( set(pixelsMisselX).intersection(set(pixelsPersonaX))   ) )  > dificuldade:
+
+        if len(list(set(pixelsMisselY).intersection(set(pixelsPersonaY)))) > dificuldade:
+            if len(list(set(pixelsMisselX).intersection(set(pixelsPersonaX)))) > dificuldade:
                 escreverDados(nome, pontos)
                 dead()
                 
@@ -184,6 +189,7 @@ def dead():
 
 
 def start():
+    somDeEntrada.play()
     larguraButtonStart = 150
     alturaButtonStart  = 40
     larguraButtonQuit = 150
@@ -199,6 +205,7 @@ def start():
                 if quitButton.collidepoint(evento.pos):
                     larguraButtonQuit = 140
                     alturaButtonQuit  = 35
+                    pygame.mixer.music.stop()
 
                 
             elif evento.type == pygame.MOUSEBUTTONUP:
@@ -223,7 +230,7 @@ def start():
         quitButton = pygame.draw.rect(tela, branco, (10,60, larguraButtonQuit, alturaButtonQuit), border_radius=15)
         quitTexto = fonteMenu.render("Sair do Game", True, preto)
         tela.blit(quitTexto, (25,62))
-        texto = fonteMenu.render(f"O maior pintudo - {nome_maior} - {maior_pontos} - { dataJogada} ", True, branco)
+        texto = fonteMenu.render(f"The Best - {nome_maior} - {maior_pontos} - { dataJogada} ", True, branco)
         tela.blit(texto, (480,15))
         
 
