@@ -13,34 +13,35 @@ while True:
         break
     else:
         print("Nome Inválido!")
-        
-tamanho = (800,200)
-pygame.display.set_caption("Iron Man de Pensamento computacional")
-icone  = pygame.image.load("assets/icone.png")
+
+       
+tamanho = (1000,700)
+pygame.display.set_caption("RacerBoom")
+icone  = pygame.image.load("base/icone.png")
 pygame.display.set_icon(icone)
 relogio = pygame.time.Clock()
 tela = pygame.display.set_mode( tamanho ) 
 branco = (255, 255, 255)
 preto = (0, 0, 0)
 
-fundo = pygame.image.load("assets/background.jpg")
-fundoDead = pygame.image.load("assets/backgroundDead.jpg")
-fundoStart = pygame.image.load("assets/backgroundStart.jpg")
+fundo = pygame.image.load("base/background.png")
+fundoDead = pygame.image.load("base/backgroundDead.jpg")
+fundoStart = pygame.image.load("base/backgroundStart.jpg")
 
-iron = pygame.image.load("assets/IronMan.png")
-iron = pygame.transform.scale(iron, (116,51))
-missel = pygame.image.load("assets/missile.png")
+Skyline = pygame.image.load("base/CarroSKYLine.png")
+Skyline = pygame.transform.scale(Skyline, (150,90))
+missel = pygame.image.load("base/missile.png")
 missel = pygame.transform.scale(missel, (125,25))
-missileSound = pygame.mixer.Sound("assets/missile.wav")
-explosaoSound = pygame.mixer.Sound("assets/explosao.wav")
-pygame.mixer.music.load("assets/ironsound.mp3")
+missileSound = pygame.mixer.Sound("base/missile.wav")
+explosaoSound = pygame.mixer.Sound("base/explosao.wav")
+pygame.mixer.music.load("base/ironsound.mp3")
 fonteMenu = pygame.font.SysFont("comicsans",18)
 
 def jogar():
     fundoMov1 = 0
-    fundoMov2 = 1129
-    posicaoXPersona = 0
-    posicaoYPersona = 60
+    fundoMov2 = -3028
+    posicaoXPersona = 425
+    posicaoYPersona = 475
     movimentoXPersona  = 0
     movimentoYPersona  = 0
     velocidadeMovPersona = 5
@@ -76,14 +77,14 @@ def jogar():
         
         posicaoXPersona = posicaoXPersona + movimentoXPersona          
         posicaoYPersona = posicaoYPersona + movimentoYPersona            
-        if posicaoXPersona < 0 :
-            posicaoXPersona = 0
-        elif posicaoXPersona > 685:
-            posicaoXPersona = 685
-        if posicaoYPersona < 0 :
-            posicaoYPersona = 0
-        elif posicaoYPersona > 150:
-            posicaoYPersona = 150
+        if posicaoXPersona < 285:
+            posicaoXPersona = 285
+        elif posicaoXPersona > 560:
+            posicaoXPersona = 560
+        if posicaoYPersona < 250 :
+            posicaoYPersona = 250
+        elif posicaoYPersona > 550:
+            posicaoYPersona = 550
             
             
         posicaoXMissel = posicaoXMissel - velocidadeMissel
@@ -95,20 +96,25 @@ def jogar():
             posicaoYMissel = random.randint(0,200)
                             
         tela.fill(branco)
-        tela.blit(fundo, (fundoMov1,0) )
-        tela.blit(fundo, (fundoMov2,0) )
-        fundoMov1 -= 1
-        fundoMov2 -= 1
-        if fundoMov1 <= -1129:
-            fundoMov1 = 1129
-        elif fundoMov2 <= -1129:
-            fundoMov2 = 1129
+        tela.blit(fundo, (0,fundoMov1) )
+        tela.blit(fundo, (0,fundoMov2) )
+        fundoMov1 += 1
+        fundoMov2 += 1
+        if fundoMov1 >= 3028:
+            fundoMov1 = -3028
+        if fundoMov2 >= 3028:
+            fundoMov2 = -3028
         
         
-        tela.blit(iron, (posicaoXPersona,posicaoYPersona))
+        tela.blit(Skyline, (posicaoXPersona,posicaoYPersona))
         tela.blit( missel, (posicaoXMissel, posicaoYMissel) )
         texto = fonteMenu.render("Pontos: "+str(pontos), True, branco)
         tela.blit(texto, (700,15))
+        
+        fonte_coord = pygame.font.SysFont("Arial", 25)
+
+        texto_posicao = fonte_coord.render(f"X: {posicaoXPersona} | Y: {posicaoYPersona}", True, (255, 255, 255))
+        tela.blit(texto_posicao, (10, 10))
             
         pixelsPersonaX = list(range(posicaoXPersona, posicaoXPersona+116))
         pixelsPersonaY = list(range(posicaoYPersona, posicaoYPersona+51))
