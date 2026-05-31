@@ -24,7 +24,7 @@ tela = pygame.display.set_mode( tamanho )
 branco = (255, 255, 255)
 preto = (0, 0, 0)
 
-fundo = pygame.image.load("base/background.png")
+fundo = pygame.image.load("base/teste1.png")
 fundoDead = pygame.image.load("base/backgroundDead.jpg")
 fundoStart = pygame.image.load("base/backgroundStart.jpg")
 
@@ -39,7 +39,7 @@ fonteMenu = pygame.font.SysFont("comicsans",18)
 
 def jogar():
     fundoMov1 = 0
-    fundoMov2 = -3028
+    fundoMov2 = -2108
     posicaoXPersona = 425
     posicaoYPersona = 475
     movimentoXPersona  = 0
@@ -100,10 +100,10 @@ def jogar():
         tela.blit(fundo, (0,fundoMov2) )
         fundoMov1 += 1
         fundoMov2 += 1
-        if fundoMov1 >= 3028:
-            fundoMov1 = -3028
-        if fundoMov2 >= 3028:
-            fundoMov2 = -3028
+        if fundoMov1 >= 2108:
+            fundoMov1 = -2108
+        if fundoMov2 >= 2108:
+            fundoMov2 = -2108
         
         
         tela.blit(Skyline, (posicaoXPersona,posicaoYPersona))
