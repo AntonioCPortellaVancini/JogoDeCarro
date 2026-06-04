@@ -32,8 +32,8 @@ fundoStart = pygame.image.load("base/backgroundStart.jpg")
 
 Skyline = pygame.image.load("base/CarroSKYLine.png")
 Skyline = pygame.transform.scale(Skyline, (150,90))
-missel = pygame.image.load("base/missile.png")
-missel = pygame.transform.scale(missel, (125,25))
+Caminhao = pygame.image.load("base/Caminhao.png")
+Caminhao = pygame.transform.scale(Caminhao, (150,150))
 missileSound = pygame.mixer.Sound("base/missile.wav")
 explosaoSound = pygame.mixer.Sound("base/explosao.wav")
 fonteMenu = pygame.font.SysFont("comicsans",18)
@@ -44,14 +44,14 @@ def jogar():
     
     fundoMov1 = 0
     fundoMov2 = -2108
-    posicaoXPersona = 425
-    posicaoYPersona = 475
-    movimentoXPersona  = 0
-    movimentoYPersona  = 0
-    velocidadeMovPersona = 5
-    posicaoXMissel = random.choice([315, 370, 425, 480, 535])
-    posicaoYMissel = -100
-    velocidadeMissel = 2
+    posicaoXSkyline = 425
+    posicaoYSkyline = 475
+    movimentoXSkyline  = 0
+    movimentoYSkyline  = 0
+    velocidadeMovSkyline = 5
+    posicaoXCaminhao = random.choice([315, 370, 425, 480, 535])
+    posicaoYCaminhao = -100
+    velocidadeCaminhao = 2
     pontos = 0
     pygame.mixer.Sound.play(missileSound)
     pygame.mixer.music.play(-1)
@@ -60,44 +60,36 @@ def jogar():
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 quit()
-                movimentoXPersona = 0
-            elif evento.type == pygame.KEYDOWN and evento.key == pygame.K_UP:
-                movimentoYPersona = -velocidadeMovPersona
-            elif evento.type == pygame.KEYDOWN and evento.key == pygame.K_DOWN:
-                movimentoYPersona = velocidadeMovPersona
-            elif evento.type == pygame.KEYUP and evento.key == pygame.K_UP:
-                movimentoYPersona = 0
-            elif evento.type == pygame.KEYUP and evento.key == pygame.K_DOWN:
-                movimentoYPersona = 0
+                movimentoXSkyline = 0
             elif evento.type == pygame.KEYDOWN and evento.key == pygame.K_RIGHT:
-                movimentoXPersona = velocidadeMovPersona
+                movimentoXSkyline = velocidadeMovSkyline
             elif evento.type == pygame.KEYDOWN and evento.key == pygame.K_LEFT:
-                movimentoXPersona = -velocidadeMovPersona
+                movimentoXSkyline = -velocidadeMovSkyline
             elif evento.type == pygame.KEYUP and evento.key == pygame.K_RIGHT:
-                movimentoXPersona = 0
+                movimentoXSkyline = 0
             elif evento.type == pygame.KEYUP and evento.key == pygame.K_LEFT:
-                movimentoXPersona = 0
+                movimentoXSkyline = 0
                 
         
-        posicaoXPersona = posicaoXPersona + movimentoXPersona          
-        posicaoYPersona = posicaoYPersona + movimentoYPersona            
-        if posicaoXPersona < 315:
-            posicaoXPersona = 315
-        elif posicaoXPersona > 535:
-            posicaoXPersona = 535
-        if posicaoYPersona < 0 :
-            posicaoYPersona = 0
-        elif posicaoYPersona > 550:
-            posicaoYPersona = 550
+        posicaoXSkyline = posicaoXSkyline + movimentoXSkyline          
+        posicaoYSkyline = posicaoYSkyline + movimentoYSkyline            
+        if posicaoXSkyline < 315:
+            posicaoXSkyline = 315
+        elif posicaoXSkyline > 535:
+            posicaoXSkyline = 535
+        if posicaoYSkyline < 0 :
+            posicaoYSkyline = 0
+        elif posicaoYSkyline > 550:
+            posicaoYSkyline = 550
             
             
-        posicaoYMissel = posicaoYMissel + velocidadeMissel
-        if posicaoYMissel > 800:
+        posicaoYCaminhao = posicaoYCaminhao + velocidadeCaminhao
+        if posicaoYCaminhao > 800:
             pygame.mixer.Sound.play(missileSound)
-            posicaoYMissel = -100
-            posicaoXMissel = random.choice([315, 370, 425, 480, 535])
+            posicaoYCaminhao = -100
+            posicaoXCaminhao = random.choice([315, 370, 425, 480, 535])
             pontos = pontos + 1
-            velocidadeMissel = velocidadeMissel + 1
+            velocidadeCaminhao = velocidadeCaminhao + 1
                             
         tela.fill(branco)
         tela.blit(fundo, (0, fundoMov1))
@@ -110,23 +102,23 @@ def jogar():
         if fundoMov2 >= 2108:
             fundoMov2 = -2108
 
-        tela.blit(Skyline, (posicaoXPersona, posicaoYPersona))
-        tela.blit(missel, (posicaoXMissel, posicaoYMissel))
+        tela.blit(Skyline, (posicaoXSkyline, posicaoYSkyline))
+        tela.blit(Caminhao, (posicaoXCaminhao, posicaoYCaminhao))
 
         texto = fonteMenu.render("Pontos: " + str(pontos), True, branco)
         tela.blit(texto, (700, 15))
 
         fonte_coord = pygame.font.SysFont("Arial", 25)
-        texto_posicao = fonte_coord.render(f"X: {posicaoXPersona} | Y: {posicaoYPersona}", True, (255, 255, 255))
+        texto_posicao = fonte_coord.render(f"X: {posicaoXSkyline} | Y: {posicaoYSkyline}", True, (255, 255, 255))
         tela.blit(texto_posicao, (10, 10))
             
-        pixelsPersonaX = list(range(posicaoXPersona, posicaoXPersona + 116))
-        pixelsPersonaY = list(range(posicaoYPersona, posicaoYPersona + 51))
-        pixelsMisselX = list(range(posicaoXMissel, posicaoXMissel + 125))
-        pixelsMisselY = list(range(posicaoYMissel, posicaoYMissel + 25))
+        pixelsSkylineX = list(range(posicaoXSkyline, posicaoXSkyline + 116))
+        pixelsSkylineY = list(range(posicaoYSkyline, posicaoYSkyline + 60))
+        pixelsCaminhaoX = list(range(posicaoXCaminhao, posicaoXCaminhao + 60))
+        pixelsCaminhaoY = list(range(posicaoYCaminhao, posicaoYCaminhao + 137))
 
-        if len(list(set(pixelsMisselY).intersection(set(pixelsPersonaY)))) > dificuldade:
-            if len(list(set(pixelsMisselX).intersection(set(pixelsPersonaX)))) > dificuldade:
+        if len(list(set(pixelsCaminhaoY).intersection(set(pixelsSkylineY)))) > dificuldade:
+            if len(list(set(pixelsCaminhaoX).intersection(set(pixelsSkylineX)))) > dificuldade:
                 escreverDados(nome, pontos)
                 dead()
                 
