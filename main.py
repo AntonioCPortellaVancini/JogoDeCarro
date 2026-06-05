@@ -1,5 +1,6 @@
 import pygame
 import random
+import json
 from recursos.funcoes import inicializarBancoDeDados, limpar_tela, escreverDados, maior_pontuador
 
 limpar_tela()
@@ -27,8 +28,8 @@ branco = (255, 255, 255)
 preto = (0, 0, 0)
 
 fundo = pygame.image.load("base/beckground.png")
-fundoDead = pygame.image.load("base/backgroundDead.jpg")
-fundoStart = pygame.image.load("base/backgroundStart.jpg")
+fundoDead = pygame.image.load("base/backgroundDead.png")
+fundoStart = pygame.image.load("base/backgroundStart.png")
 
 Skyline = pygame.image.load("base/CarroSKYLine.png")
 Skyline = pygame.transform.scale(Skyline, (150,90))
@@ -112,8 +113,8 @@ def jogar():
         texto_posicao = fonte_coord.render(f"X: {posicaoXSkyline} | Y: {posicaoYSkyline}", True, (255, 255, 255))
         tela.blit(texto_posicao, (10, 10))
             
-        pixelsSkylineX = list(range(posicaoXSkyline, posicaoXSkyline + 116))
-        pixelsSkylineY = list(range(posicaoYSkyline, posicaoYSkyline + 60))
+        pixelsSkylineX = list(range(posicaoXSkyline, posicaoXSkyline + 60))
+        pixelsSkylineY = list(range(posicaoYSkyline, posicaoYSkyline + 100))
         pixelsCaminhaoX = list(range(posicaoXCaminhao, posicaoXCaminhao + 60))
         pixelsCaminhaoY = list(range(posicaoYCaminhao, posicaoYCaminhao + 137))
 
@@ -131,49 +132,96 @@ def jogar():
         pygame.display.update()
         relogio.tick(60)
 
+
 def dead():
     pygame.mixer.music.stop()
     pygame.mixer.Sound.play(explosaoSound)
     larguraButtonStart = 150
     alturaButtonStart  = 40
     larguraButtonQuit = 150
-    alturaButtonQuit  = 40
+    comandos  = 40
+    
+    estado = "dead"
+    larguraVoltar = 150
+    alturaVoltar = 40
+    lista_ranking = []
+    
     while True:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
+                pygame.quit()
                 quit()
-            elif evento.type == pygame.MOUSEBUTTONDOWN:
-                if startButton.collidepoint(evento.pos):
-                    larguraButtonStart = 140
-                    alturaButtonStart  = 35
-                if quitButton.collidepoint(evento.pos):
-                    larguraButtonQuit = 140
-                    alturaButtonQuit  = 35
-
-                
-            elif evento.type == pygame.MOUSEBUTTONUP:
-                # Verifica se o clique foi dentro do retângulo
-                if startButton.collidepoint(evento.pos):
-                    #pygame.mixer.music.play(-1)
-                    larguraButtonStart = 150
-                    alturaButtonStart  = 40
-                    jogar()
-                if quitButton.collidepoint(evento.pos):
-                    #pygame.mixer.music.play(-1)
-                    larguraButtonQuit = 150
-                    alturaButtonQuit  = 40
-                    quit()
             
-        tela.fill(branco)
-        tela.blit(fundoDead, (0,0))
-        startButton = pygame.draw.rect(tela, branco, (10,10, larguraButtonStart, alturaButtonStart), border_radius=15)
-        startTexto = fonteMenu.render("Iniciar Game", True, preto)
-        tela.blit(startTexto, (25,12))
-        
-        quitButton = pygame.draw.rect(tela, branco, (10,60, larguraButtonQuit, alturaButtonQuit), border_radius=15)
-        quitTexto = fonteMenu.render("Sair do Game", True, preto)
-        tela.blit(quitTexto, (25,62))
+            if estado == "dead":
+                if evento.type == pygame.MOUSEBUTTONDOWN:
+                    if startButton.collidepoint(evento.pos):
+                        larguraButtonStart = 140
+                        alturaButtonStart  = 35
+                    if quitButton.collidepoint(evento.pos):
+                        larguraButtonQuit = 140
+                        comandos  = 35
 
+                elif evento.type == pygame.MOUSEBUTTONUP:
+                    if startButton.collidepoint(evento.pos):
+                        larguraButtonStart = 150
+                        alturaButtonStart  = 40
+                        jogar()
+                    
+                    if quitButton.collidepoint(evento.pos):
+                        larguraButtonQuit = 150
+                        comandos = 40
+                        
+                        try:
+                            banco = open("base.atitus", "r")
+                            dados = banco.read()
+                            banco.close()
+                            dadosDict = json.loads(dados) if dados != "" else {}
+                        except:
+                            dadosDict = {}
+                        
+                        lista_ranking = sorted(dadosDict.items(), key=lambda x: x[1][0], reverse=True)[:5]
+                        estado = "ranking"
+
+            elif estado == "ranking":
+                if evento.type == pygame.MOUSEBUTTONDOWN:
+                    if voltarButton.collidepoint(evento.pos):
+                        larguraVoltar = 140
+                        alturaVoltar = 35
+                        
+                elif evento.type == pygame.MOUSEBUTTONUP:
+                    if voltarButton.collidepoint(evento.pos):
+                        larguraVoltar = 150
+                        alturaVoltar = 40
+                        estado = "dead"
+            
+        if estado == "dead":
+            tela.fill(branco)
+            tela.blit(fundoDead, (0,0))
+            
+            startButton = pygame.draw.rect(tela, branco, (10, 10, larguraButtonStart, alturaButtonStart), border_radius=15)
+            startTexto = fonteMenu.render("Tentar de novo?", True, preto)
+            tela.blit(startTexto, startTexto.get_rect(center=startButton.center))
+            
+            quitButton = pygame.draw.rect(tela, branco, (10, 60, larguraButtonQuit, comandos), border_radius=15)
+            quitTexto = fonteMenu.render("Recordes", True, preto)
+            tela.blit(quitTexto, quitTexto.get_rect(center=quitButton.center))
+
+        elif estado == "ranking":
+            tela.fill(preto)
+            
+            titulo = fonteMenu.render("TOP 5 MAIORES PONTUADORES", True, branco)
+            tela.blit(titulo, (180, 100))
+            
+            pos_y = 200
+            for i, (nome, info) in enumerate(lista_ranking):
+                texto_jogador = f"{i+1}. {nome} - {info[0]} pts ({info[1]})"
+                item_ranking = fonteMenu.render(texto_jogador, True, branco)
+                tela.blit(item_ranking, (150, pos_y))
+                pos_y += 50
+            
+            voltarButton = pygame.draw.rect(tela, branco, (275, 650, larguraVoltar, alturaVoltar), border_radius=15)
+            voltarTexto = fonteMenu.render("Voltar", True, preto)
+            tela.blit(voltarTexto, voltarTexto.get_rect(center=voltarButton.center))
 
         pygame.display.update()
         relogio.tick(60)
@@ -185,48 +233,84 @@ def start():
     larguraButtonStart = 150
     alturaButtonStart  = 40
     larguraButtonQuit = 150
-    alturaButtonQuit  = 40
+    comandos = 40
+    
+    estado = "menu" 
+    larguraVoltar = 150
+    alturaVoltar = 40
+
     while True:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
+                pygame.quit()
                 quit()
-            elif evento.type == pygame.MOUSEBUTTONDOWN:
-                if startButton.collidepoint(evento.pos):
-                    larguraButtonStart = 140
-                    alturaButtonStart  = 35
-                if quitButton.collidepoint(evento.pos):
-                    larguraButtonQuit = 140
-                    alturaButtonQuit  = 35
-                    pygame.mixer.music.stop()
-
-                
-            elif evento.type == pygame.MOUSEBUTTONUP:
-                # Verifica se o clique foi dentro do retângulo
-                if startButton.collidepoint(evento.pos):
-                    #pygame.mixer.music.play(-1)
-                    larguraButtonStart = 150
-                    alturaButtonStart  = 40
-                    jogar()
-                if quitButton.collidepoint(evento.pos):
-                    #pygame.mixer.music.play(-1)
-                    larguraButtonQuit = 150
-                    alturaButtonQuit  = 40
-                    quit()
             
-        tela.fill(branco)
-        tela.blit(fundoStart, (0,0))
-        startButton = pygame.draw.rect(tela, branco, (10,10, larguraButtonStart, alturaButtonStart), border_radius=15)
-        startTexto = fonteMenu.render("Iniciar Game", True, preto)
-        tela.blit(startTexto, (25,12))
-        
-        quitButton = pygame.draw.rect(tela, branco, (10,60, larguraButtonQuit, alturaButtonQuit), border_radius=15)
-        quitTexto = fonteMenu.render("Sair do Game", True, preto)
-        tela.blit(quitTexto, (25,62))
-        texto = fonteMenu.render(f"The Best - {nome_maior} - {maior_pontos} - { dataJogada} ", True, branco)
-        tela.blit(texto, (480,15))
-        
+            if estado == "menu":
+                if evento.type == pygame.MOUSEBUTTONDOWN:
+                    if startButton.collidepoint(evento.pos):
+                        larguraButtonStart = 140
+                        alturaButtonStart  = 35
+                    if quitButton.collidepoint(evento.pos):
+                        larguraButtonQuit = 140
+                        comandos = 35
+                        pygame.mixer.music.stop()
+
+                elif evento.type == pygame.MOUSEBUTTONUP:
+                    if startButton.collidepoint(evento.pos):
+                        larguraButtonStart = 150
+                        alturaButtonStart  = 40
+                        jogar()
+                    
+                    if quitButton.collidepoint(evento.pos):
+                        larguraButtonQuit = 150
+                        comandos = 40
+                        estado = "comandos"
+
+            elif estado == "comandos":
+                if evento.type == pygame.MOUSEBUTTONDOWN:
+                    if voltarButton.collidepoint(evento.pos):
+                        larguraVoltar = 140
+                        alturaVoltar = 35
+                        
+                elif evento.type == pygame.MOUSEBUTTONUP:
+                    if voltarButton.collidepoint(evento.pos):
+                        larguraVoltar = 150
+                        alturaVoltar = 40
+                        estado = "menu"
+
+        if estado == "menu":
+            tela.fill(branco)
+            tela.blit(fundoStart, (0,0))
+            
+            startButton = pygame.draw.rect(tela, branco, (330, 550, larguraButtonStart, alturaButtonStart), border_radius=15)
+            startTexto = fonteMenu.render("Iniciar Game", True, preto)
+            tela.blit(startTexto, startTexto.get_rect(center=startButton.center))
+            
+            quitButton = pygame.draw.rect(tela, branco, (550, 550, larguraButtonQuit, comandos), border_radius=15)
+            quitTexto = fonteMenu.render("Comandos", True, preto)
+            tela.blit(quitTexto, quitTexto.get_rect(center=quitButton.center))
+            
+            texto = fonteMenu.render(f"The Best - {nome_maior} - {maior_pontos} - {dataJogada} ", True, branco)
+            tela.blit(texto, (480, 15))
+            
+        elif estado == "comandos":
+            tela.fill(preto)
+            
+            titulo = fonteMenu.render("COMANDOS DO JOGO", True, branco)
+            txt_esquerda = fonteMenu.render("Seta Esquerda (<-) : Move para Esquerda", True, branco)
+            txt_direita = fonteMenu.render("Seta Direita (->) : Move para Direita", True, branco)
+            txt_pausa = fonteMenu.render("Espaço : Pausa o Jogo", True, branco)
+            
+            tela.blit(titulo, (200, 150))
+            tela.blit(txt_esquerda, (120, 300))
+            tela.blit(txt_direita, (120, 370))
+            tela.blit(txt_pausa, (120, 440))
+            
+            voltarButton = pygame.draw.rect(tela, branco, (275, 650, larguraVoltar, alturaVoltar), border_radius=15)
+            voltarTexto = fonteMenu.render("Voltar", True, preto)
+            tela.blit(voltarTexto, voltarTexto.get_rect(center=voltarButton.center))
 
         pygame.display.update()
         relogio.tick(60)
-           
+
 start()
