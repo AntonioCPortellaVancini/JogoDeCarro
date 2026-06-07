@@ -43,6 +43,7 @@ def jogar():
     somDeEntrada.stop()
     pygame.mixer.music.play()
     
+    pausado = False
     fundoMov1 = 0
     fundoMov2 = -2108
     posicaoXSkyline = 425
@@ -62,47 +63,66 @@ def jogar():
             if evento.type == pygame.QUIT:
                 quit()
                 movimentoXSkyline = 0
-            elif evento.type == pygame.KEYDOWN and evento.key == pygame.K_RIGHT:
-                movimentoXSkyline = velocidadeMovSkyline
-            elif evento.type == pygame.KEYDOWN and evento.key == pygame.K_LEFT:
-                movimentoXSkyline = -velocidadeMovSkyline
-            elif evento.type == pygame.KEYUP and evento.key == pygame.K_RIGHT:
-                movimentoXSkyline = 0
-            elif evento.type == pygame.KEYUP and evento.key == pygame.K_LEFT:
-                movimentoXSkyline = 0
+            elif evento.type == pygame.KEYDOWN and evento.key == pygame.K_SPACE:
+                if pausado == True:
+                    pausado = False
+                elif pausado == False:
+                    pausado = True
+            elif pausado == False:
+                if evento.type == pygame.KEYDOWN and evento.key == pygame.K_RIGHT:
+                    movimentoXSkyline = velocidadeMovSkyline
+                elif evento.type == pygame.KEYDOWN and evento.key == pygame.K_LEFT:
+                    movimentoXSkyline = -velocidadeMovSkyline
+                elif evento.type == pygame.KEYUP and evento.key == pygame.K_RIGHT:
+                    movimentoXSkyline = 0
+                elif evento.type == pygame.KEYUP and evento.key == pygame.K_LEFT:
+                    movimentoXSkyline = 0
                 
-        
-        posicaoXSkyline = posicaoXSkyline + movimentoXSkyline          
-        posicaoYSkyline = posicaoYSkyline + movimentoYSkyline            
-        if posicaoXSkyline < 315:
-            posicaoXSkyline = 315
-        elif posicaoXSkyline > 535:
-            posicaoXSkyline = 535
-        if posicaoYSkyline < 0 :
-            posicaoYSkyline = 0
-        elif posicaoYSkyline > 550:
-            posicaoYSkyline = 550
-            
-            
-        posicaoYCaminhao = posicaoYCaminhao + velocidadeCaminhao
-        if posicaoYCaminhao > 800:
-            pygame.mixer.Sound.play(missileSound)
-            posicaoYCaminhao = -100
-            posicaoXCaminhao = random.choice([315, 370, 425, 480, 535])
-            pontos = pontos + 1
-            velocidadeCaminhao = velocidadeCaminhao + 1
-                            
+        if pausado == False:
+            posicaoXSkyline = posicaoXSkyline + movimentoXSkyline          
+            posicaoYSkyline = posicaoYSkyline + movimentoYSkyline            
+            if posicaoXSkyline < 315:
+                posicaoXSkyline = 315
+            elif posicaoXSkyline > 535:
+                posicaoXSkyline = 535
+            if posicaoYSkyline < 0 :
+                posicaoYSkyline = 0
+            elif posicaoYSkyline > 550:
+                posicaoYSkyline = 550
+                
+            posicaoYCaminhao = posicaoYCaminhao + velocidadeCaminhao
+            if posicaoYCaminhao > 800:
+                pygame.mixer.Sound.play(missileSound)
+                posicaoYCaminhao = -100
+                posicaoXCaminhao = random.choice([315, 370, 425, 480, 535])
+                pontos = pontos + 1
+                velocidadeCaminhao = velocidadeCaminhao + 1
+                                
+            fundoMov1 += 1
+            fundoMov2 += 1
+
+            if fundoMov1 >= 2108:
+                fundoMov1 = -2108
+            if fundoMov2 >= 2108:
+                fundoMov2 = -2108
+
+            pixelsSkylineX = list(range(posicaoXSkyline, posicaoXSkyline + 60))
+            pixelsSkylineY = list(range(posicaoYSkyline, posicaoYSkyline + 100))
+            pixelsCaminhaoX = list(range(posicaoXCaminhao, posicaoXCaminhao + 60))
+            pixelsCaminhaoY = list(range(posicaoYCaminhao, posicaoYCaminhao + 137))
+
+            if len(list(set(pixelsCaminhaoY).intersection(set(pixelsSkylineY)))) > dificuldade:
+                if len(list(set(pixelsCaminhaoX).intersection(set(pixelsSkylineX)))) > dificuldade:
+                    escreverDados(nome, pontos)
+                    dead()
+                else:
+                    print("Ainda Vivo, mas por pouco!")
+            else:
+                print("Ainda Vivo")
+
         tela.fill(branco)
         tela.blit(fundo, (0, fundoMov1))
         tela.blit(fundo, (0, fundoMov2))
-        fundoMov1 += 1
-        fundoMov2 += 1
-
-        if fundoMov1 >= 2108:
-            fundoMov1 = -2108
-        if fundoMov2 >= 2108:
-            fundoMov2 = -2108
-
         tela.blit(Skyline, (posicaoXSkyline, posicaoYSkyline))
         tela.blit(Caminhao, (posicaoXCaminhao, posicaoYCaminhao))
 
@@ -112,22 +132,10 @@ def jogar():
         fonte_coord = pygame.font.SysFont("Arial", 25)
         texto_posicao = fonte_coord.render(f"X: {posicaoXSkyline} | Y: {posicaoYSkyline}", True, (255, 255, 255))
         tela.blit(texto_posicao, (10, 10))
-            
-        pixelsSkylineX = list(range(posicaoXSkyline, posicaoXSkyline + 60))
-        pixelsSkylineY = list(range(posicaoYSkyline, posicaoYSkyline + 100))
-        pixelsCaminhaoX = list(range(posicaoXCaminhao, posicaoXCaminhao + 60))
-        pixelsCaminhaoY = list(range(posicaoYCaminhao, posicaoYCaminhao + 137))
-
-        if len(list(set(pixelsCaminhaoY).intersection(set(pixelsSkylineY)))) > dificuldade:
-            if len(list(set(pixelsCaminhaoX).intersection(set(pixelsSkylineX)))) > dificuldade:
-                escreverDados(nome, pontos)
-                dead()
-                
-            else:
-                print("Ainda Vivo, mas por pouco!")
-        else:
-            print("Ainda Vivo")
         
+        if pausado == True:
+            texto_pause = fonteMenu.render("Game pausado", True, branco)
+            tela.blit(texto_pause, (450, 300))
         
         pygame.display.update()
         relogio.tick(60)
