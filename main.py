@@ -59,6 +59,11 @@ def jogar():
     pygame.mixer.Sound.play(missileSound)
     pygame.mixer.music.play(-1)
     dificuldade = 20
+
+    amarelo = (255, 255, 0)
+    raioSol = 35               
+    velocidadePulso = 0.5      
+
     while True:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
@@ -108,6 +113,13 @@ def jogar():
             if fundoMov2 >= 2108:
                 fundoMov2 = fundoMov1 - 2108
 
+            raioSol = raioSol + velocidadePulso
+            
+            if raioSol > 50:
+                velocidadePulso = -0.5
+            elif raioSol < 35:
+                velocidadePulso = 0.5
+
             pixelsSkylineX = list(range(posicaoXSkyline, posicaoXSkyline + 60))
             pixelsSkylineY = list(range(posicaoYSkyline, posicaoYSkyline + 100))
             pixelsCaminhaoX = list(range(posicaoXCaminhao, posicaoXCaminhao + 60))
@@ -125,6 +137,9 @@ def jogar():
         tela.fill(branco)
         tela.blit(fundo, (0, fundoMov1))
         tela.blit(fundo, (0, fundoMov2))
+        
+        pygame.draw.circle(tela, amarelo, (80, 80), int(raioSol))
+        
         tela.blit(Skyline, (posicaoXSkyline, posicaoYSkyline))
         tela.blit(Caminhao, (posicaoXCaminhao, posicaoYCaminhao))
 
