@@ -56,7 +56,7 @@ def jogar():
     velocidadeMovSkyline = 5
     posicaoXCaminhao = random.choice([315, 370, 425, 480, 535])
     posicaoYCaminhao = -100
-    velocidadeCaminhao = 2
+    velocidadeCaminhao = 5
     pontos = 0
     pygame.mixer.Sound.play(missileSound)
     pygame.mixer.music.play(-1)
@@ -106,6 +106,10 @@ def jogar():
                 pontos = pontos + 1
                 velocidadeCaminhao = velocidadeCaminhao + 1
                 velocidadeFundo = velocidadeFundo + 1
+                
+                conquista = verificar_conquistas(pontos, nome)
+                if conquista != "":
+                    print("NOVA CONQUISTA: " + conquista)
                                 
             fundoMov1 = fundoMov1 + velocidadeFundo
             fundoMov2 = fundoMov2 + velocidadeFundo
