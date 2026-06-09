@@ -11,10 +11,12 @@ def aguarde(segundos):
 def inicializarBancoDeDados():
     # r - read, w - write, a - append
     try:
-        banco = open("log.dat","r")
+        with open("log.dat", "r") as banco:
+            pass
     except:
         print("Banco de Dados Inexistente. Criando...")
-        banco = open("log.dat","w")
+        with open("log.dat", "w") as banco:
+            banco.write("{}")
     
 def escreverDados(nome, pontos):
     banco = open("log.dat", "r")

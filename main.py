@@ -2,6 +2,8 @@ import pygame
 import random
 import json
 from recursos.funcoes import inicializarBancoDeDados, limpar_tela, escreverDados, maior_pontuador
+from recursos.trabalho import verificar_conquistas
+
 
 limpar_tela()
 inicializarBancoDeDados()
