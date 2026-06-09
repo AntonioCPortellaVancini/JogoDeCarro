@@ -46,6 +46,7 @@ def jogar():
     pausado = False
     fundoMov1 = 0
     fundoMov2 = -2108
+    velocidadeFundo = 1
     posicaoXSkyline = 425
     posicaoYSkyline = 475
     movimentoXSkyline  = 0
@@ -97,14 +98,15 @@ def jogar():
                 posicaoXCaminhao = random.choice([315, 370, 425, 480, 535])
                 pontos = pontos + 1
                 velocidadeCaminhao = velocidadeCaminhao + 1
+                velocidadeFundo = velocidadeFundo + 1
                                 
-            fundoMov1 += 1
-            fundoMov2 += 1
+            fundoMov1 = fundoMov1 + velocidadeFundo
+            fundoMov2 = fundoMov2 + velocidadeFundo
 
             if fundoMov1 >= 2108:
-                fundoMov1 = -2108
+                fundoMov1 = fundoMov2 - 2108
             if fundoMov2 >= 2108:
-                fundoMov2 = -2108
+                fundoMov2 = fundoMov1 - 2108
 
             pixelsSkylineX = list(range(posicaoXSkyline, posicaoXSkyline + 60))
             pixelsSkylineY = list(range(posicaoYSkyline, posicaoYSkyline + 100))
@@ -180,7 +182,7 @@ def dead():
                         comandos = 40
                         
                         try:
-                            banco = open("base.atitus", "r")
+                            banco = open("log.dat", "r")
                             dados = banco.read()
                             banco.close()
                             dadosDict = json.loads(dados) if dados != "" else {}
