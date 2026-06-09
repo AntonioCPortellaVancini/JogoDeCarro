@@ -1,6 +1,9 @@
 import pygame
 import random
 import json
+import sys
+import pyttsx3
+import threading
 from recursos.funcoes import inicializarBancoDeDados, limpar_tela, escreverDados, maior_pontuador
 from recursos.trabalho import verificar_conquistas
 
@@ -12,12 +15,22 @@ pygame.mixer.pre_init(44100, -16, 2, 4096)
 pygame.init()
 somDeEntrada = pygame.mixer.Sound("base/SomDeInicio.wav")
 pygame.mixer.music.load("base/MusicaDaTelaRodando.mp3")
+
+def falar(texto):
+    def _falar():
+        engine = pyttsx3.init()
+        engine.say(texto)
+        engine.runAndWait()
+    threading.Thread(target=_falar, daemon=True).start()
+
+falar("Bem vindo ao Highway Dodgers. Digite o seu nome")
+print("Bem vindo, digite o seu nome")
 while True:
     nome = input("Informe o Nome do Competidor:")
-    if len(nome) > 0: 
+    if len(nome) > 0 and nome.replace(" ", "").isalnum():
         break
     else:
-        print("Nome Inválido!")
+        print("Nome Inválido! Use apenas letras e números.")
 
        
 tamanho = (1000,700)
@@ -32,6 +45,7 @@ preto = (0, 0, 0)
 fundo = pygame.image.load("base/beckground.png")
 fundoDead = pygame.image.load("base/backgroundDead.png")
 fundoStart = pygame.image.load("base/backgroundStart.png")
+sol_imagem = pygame.image.load("base/sol.png")
 
 Skyline = pygame.image.load("base/CarroSKYLine.png")
 Skyline = pygame.transform.scale(Skyline, (150,90))
@@ -62,21 +76,37 @@ def jogar():
     pygame.mixer.music.play(-1)
     dificuldade = 20
 
-    amarelo = (255, 255, 0)
-    raioSol = 35               
-    velocidadePulso = 0.5      
+    tamanho_sol = 100              
+    velocidadePulso = 0.5
+    
+    conquista_texto = ""
+    conquista_timer = 0
+    fonte_conquista = pygame.font.SysFont("comicsans", 22, bold=True)
+
+    # nuvem decorativa
+    nuvem_x = random.randint(0, 800)
+    nuvem_y = random.randint(20, 120)
+    nuvem_vel = random.uniform(0.5, 2.0)
 
     while True:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
-                quit()
-                movimentoXSkyline = 0
-            elif evento.type == pygame.KEYDOWN and evento.key == pygame.K_SPACE:
-                if pausado == True:
-                    pausado = False
-                elif pausado == False:
-                    pausado = True
-            elif pausado == False:
+                pygame.quit()
+                sys.exit()
+
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+                elif evento.key == pygame.K_SPACE:
+                    if pausado == True:
+                        pausado = False
+                        pygame.mixer.music.unpause()
+                    elif pausado == False:
+                        pausado = True
+                        pygame.mixer.music.pause()
+
+            if pausado == False:
                 if evento.type == pygame.KEYDOWN and evento.key == pygame.K_RIGHT:
                     movimentoXSkyline = velocidadeMovSkyline
                 elif evento.type == pygame.KEYDOWN and evento.key == pygame.K_LEFT:
@@ -110,6 +140,8 @@ def jogar():
                 conquista = verificar_conquistas(pontos, nome)
                 if conquista != "":
                     print("NOVA CONQUISTA: " + conquista)
+                    conquista_texto = " " + conquista
+                    conquista_timer = 180  # 3 segundos a 60fps
                                 
             fundoMov1 = fundoMov1 + velocidadeFundo
             fundoMov2 = fundoMov2 + velocidadeFundo
@@ -119,12 +151,19 @@ def jogar():
             if fundoMov2 >= 2108:
                 fundoMov2 = fundoMov1 - 2108
 
-            raioSol = raioSol + velocidadePulso
+            tamanho_sol = tamanho_sol + velocidadePulso
             
-            if raioSol > 50:
+            if tamanho_sol > 100:
                 velocidadePulso = -0.5
-            elif raioSol < 35:
+            elif tamanho_sol < 90:
                 velocidadePulso = 0.5
+
+            # movimento da nuvem
+            nuvem_x -= nuvem_vel
+            if nuvem_x < -200:
+                nuvem_x = random.randint(1000, 1200)
+                nuvem_y = random.randint(20, 120)
+                nuvem_vel = random.uniform(0.5, 2.0)
 
             pixelsSkylineX = list(range(posicaoXSkyline, posicaoXSkyline + 60))
             pixelsSkylineY = list(range(posicaoYSkyline, posicaoYSkyline + 100))
@@ -144,7 +183,15 @@ def jogar():
         tela.blit(fundo, (0, fundoMov1))
         tela.blit(fundo, (0, fundoMov2))
         
-        pygame.draw.circle(tela, amarelo, (80, 80), int(raioSol))
+        sol_redimensionado = pygame.transform.scale(sol_imagem, (int(tamanho_sol), int(tamanho_sol)))
+        rect_sol = sol_redimensionado.get_rect(center=(80, 80))
+        tela.blit(sol_redimensionado, rect_sol)
+
+        # desenha nuvem decorativa
+        cor_nuvem = (220, 220, 220)
+        pygame.draw.ellipse(tela, cor_nuvem, (int(nuvem_x),      int(nuvem_y),      80, 40))
+        pygame.draw.ellipse(tela, cor_nuvem, (int(nuvem_x) + 20, int(nuvem_y) - 20, 60, 40))
+        pygame.draw.ellipse(tela, cor_nuvem, (int(nuvem_x) + 50, int(nuvem_y) - 10, 70, 35))
         
         tela.blit(Skyline, (posicaoXSkyline, posicaoYSkyline))
         tela.blit(Caminhao, (posicaoXCaminhao, posicaoYCaminhao))
@@ -159,6 +206,14 @@ def jogar():
         if pausado == True:
             texto_pause = fonteMenu.render("Game pausado", True, branco)
             tela.blit(texto_pause, (450, 300))
+
+        if conquista_timer > 0:
+            conquista_timer -= 1
+            surf = fonte_conquista.render(conquista_texto, True, (255, 215, 0))
+            bg = pygame.Surface((surf.get_width() + 20, surf.get_height() + 10), pygame.SRCALPHA)
+            bg.fill((0, 0, 0, 160))
+            tela.blit(bg, (tela.get_width() // 2 - bg.get_width() // 2, 10))
+            tela.blit(surf, (tela.get_width() // 2 - surf.get_width() // 2, 15))
         
         pygame.display.update()
         relogio.tick(60)
@@ -176,12 +231,22 @@ def dead():
     larguraVoltar = 150
     alturaVoltar = 40
     lista_ranking = []
-    
+
+    # inicializa os rects para evitar NameError na primeira iteração
+    startButton  = pygame.Rect(10, 10, larguraButtonStart, alturaButtonStart)
+    quitButton   = pygame.Rect(10, 60, larguraButtonQuit, comandos)
+    voltarButton = pygame.Rect(275, 650, larguraVoltar, alturaVoltar)
+
     while True:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 pygame.quit()
-                quit()
+                sys.exit()
+
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
             
             if estado == "dead":
                 if evento.type == pygame.MOUSEBUTTONDOWN:
@@ -270,12 +335,23 @@ def start():
     larguraVoltar = 150
     alturaVoltar = 40
 
+    # inicializa os rects para evitar NameError na primeira iteração
+    startButton = pygame.Rect(330, 550, larguraButtonStart, alturaButtonStart)
+    quitButton  = pygame.Rect(550, 550, larguraButtonQuit, comandos)
+    voltarButton = pygame.Rect(275, 650, larguraVoltar, alturaVoltar)
+
     while True:
         for evento in pygame.event.get():
+            print(evento)  # DEBUG - remover depois
             if evento.type == pygame.QUIT:
                 pygame.quit()
-                quit()
-            
+                sys.exit()
+
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+
             if estado == "menu":
                 if evento.type == pygame.MOUSEBUTTONDOWN:
                     if startButton.collidepoint(evento.pos):

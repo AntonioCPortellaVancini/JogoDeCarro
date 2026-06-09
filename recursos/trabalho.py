@@ -5,10 +5,10 @@ from datetime import datetime
 
 def verificar_conquistas(pontos, nome):
     metas = {
-        15: "Piloto Iniciante",
-        30: "Fuga Perfeita",
-        50: "Rei da Estrada",
-        100: "Lenda Intocavel"
+        5: "Piloto Iniciante",
+        20: "Fuga Perfeita",
+        30: "Rei da Estrada",
+        40: "Lenda Intocavel"
     }
     
     titulo = metas.get(pontos, "")
