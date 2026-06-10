@@ -4,10 +4,10 @@ executaveis = [
                cx_Freeze.Executable(
                    script="main.py", 
                    icon="base/icone.png",
-                    target_name="IronManMarcao.exe"
+                    target_name="HighwayDodgers.exe"
                    ) ]
 cx_Freeze.setup(
-    name = "Iron Man",
+    name = "Highway Dodgers",
     options={
         "build_exe":{
             "packages":["pygame", "recursos"],
